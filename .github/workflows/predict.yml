@@ -1,17 +1,20 @@
 # 当日の予測を更新する。
 #
 # 展示タイムは締切の約10分前に公開されるため、1日数回では取りこぼす。
-# レース開催時間帯だけ20分ごとに動かし、それ以外は止めておく。
-# 夜間は実行しないので、その間の費用は発生しない。
+# レース開催時間帯だけ10分ごとに動かし、それ以外は止めておく。
+# 夜間は実行しないので無駄なアクセスも発生しない。
 
 name: predict-today
 
 on:
   schedule:
-    # JST 11:00〜19:00 を20分間隔 (UTC 02:00〜10:00)
-    # 非公開リポジトリのため Actions は月2,000分まで無料。
-    # 15分間隔だと超過するので20分にしている。
-    - cron: '*/20 2-10 * * *'
+    # JST 11:00〜19:50 を10分間隔 (UTC 02:00〜10:50)
+    #
+    # 展示タイムは締切の約10分前に公開される。
+    # 20分間隔では12レース中5レースで展示発表前のデータのままになったため、
+    # 10分間隔にして全レースをカバーする。
+    # 公開リポジトリなので Actions は無料・無制限。
+    - cron: '*/10 2-10 * * *'
   workflow_dispatch:
 
 # 前の実行が終わる前に次が来たら、古い方を打ち切る。
@@ -27,7 +30,7 @@ permissions:
 jobs:
   predict:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -53,7 +56,9 @@ jobs:
           restore-keys: odds-db-
 
       - name: オッズを取得
-        run: python collect_odds.py --stadiums ${{ vars.STADIUMS || '22' }} || true
+        run: |
+          # 締切が近いレースのオッズだけ取る(全件だと10分に収まらない)
+          python collect_odds.py --stadiums "${{ vars.STADIUMS || '22' }}" --window 30 || true
 
       - name: 予測を更新
         run: |
@@ -61,7 +66,7 @@ jobs:
           TODAY=$(TZ=Asia/Tokyo date +%Y-%m-%d)
           python predict_today.py \
             --stadiums "${{ vars.STADIUMS || '22' }}" \
-            --window 45 \
+            --window 25 \
             --points 10 \
             --out "firebase/public/data/${TODAY}.json"
           echo "{\"latest\":\"${TODAY}\"}" > firebase/public/data/index.json

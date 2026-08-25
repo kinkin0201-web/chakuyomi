@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 sys.path.insert(0, '.')
 from fetch_odds import fetch
 from build_db_bulk import download, parse_b_file
+from predict_today import parse_deadlines, _mins_to
 
 DB = "odds.db"
 
@@ -42,6 +43,8 @@ def main():
     p.add_argument("--date", help="YYYY-MM-DD (既定: 本日JST)")
     p.add_argument("--stadiums", help="場コード(カンマ区切り)。省略で開催中の全場")
     p.add_argument("--db", default=DB)
+    p.add_argument("--window", type=int, default=0,
+                   help="締切まで何分先のレースを取るか(0=全件)")
     a = p.parse_args()
 
     d = (datetime.strptime(a.date, "%Y-%m-%d").date() if a.date
@@ -61,6 +64,23 @@ def main():
         races_by_st = {}
         for rid, rec in b.items():
             races_by_st.setdefault(rec["stadium_code"], []).append(rec["race_number"])
+
+    # 締切が近いレースだけに絞る。
+    # オッズは締切直前ほど正確で、遠いレースを取っても意味が薄い。
+    if a.window:
+        text = download("B", d)
+        if text:
+            dls = parse_deadlines(text, hd, None)
+            filtered = {}
+            for jcd, rnos in races_by_st.items():
+                keep = []
+                for rno in rnos:
+                    left = _mins_to(dls.get(f"{hd}_{jcd}_{rno}", ""))
+                    if left is not None and -5 < left <= a.window:
+                        keep.append(rno)
+                if keep:
+                    filtered[jcd] = keep
+            races_by_st = filtered
 
     conn = sqlite3.connect(a.db)
     init_db(conn)
