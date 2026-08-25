@@ -1,15 +1,17 @@
 # 当日の予測を更新する。
 #
 # 展示タイムは締切の約10分前に公開されるため、1日数回では取りこぼす。
-# レース開催時間帯だけ15分ごとに動かし、それ以外は止めておく。
-# (GitHub Actions は公開リポジトリなら無料。動かさなければ費用も発生しない)
+# レース開催時間帯だけ20分ごとに動かし、それ以外は止めておく。
+# 夜間は実行しないので、その間の費用は発生しない。
 
 name: predict-today
 
 on:
   schedule:
-    # JST 11:00〜19:00 を15分間隔 (UTC 02:00〜10:00)
-    - cron: '*/15 2-10 * * *'
+    # JST 11:00〜19:00 を20分間隔 (UTC 02:00〜10:00)
+    # 非公開リポジトリのため Actions は月2,000分まで無料。
+    # 15分間隔だと超過するので20分にしている。
+    - cron: '*/20 2-10 * * *'
   workflow_dispatch:
 
 # 前の実行が終わる前に次が来たら、古い方を打ち切る。
@@ -21,7 +23,7 @@ concurrency:
 jobs:
   predict:
     runs-on: ubuntu-latest
-    timeout-minutes: 14
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
