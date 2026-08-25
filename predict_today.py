@@ -26,7 +26,8 @@ warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 sys.path.insert(0, '.')
 from build_db_bulk import download, parse_b_file, STADIUMS
 from train_trifecta import rank_combos
-from publish_trifecta import group_combos, mark_of, load_odds, build_strategies
+from publish_trifecta import (group_combos, mark_of, load_odds,
+                              build_strategies, detect_upset_warning)
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                          "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"}
@@ -373,6 +374,7 @@ def main():
             "windSpeed": det["weather"].get("wind_speed"),
             "wave": det["weather"].get("wave_height"),
             "picks": [{**x, "mark": mark_of(i, x.get("ev"))} for i, x in enumerate(picks)],
+            "upset": detect_upset_warning(g),
             "safe": strategies["safe"],
             "value": strategies["value"],
             "confidence": round(float(sum(c[1] for c in combos[:a.points])), 4),

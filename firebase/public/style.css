@@ -229,3 +229,35 @@ button:focus-visible{outline:2px solid var(--solid);outline-offset:2px}
   border-top:1px solid var(--rule);margin-top:.3rem}
 .tierhead:first-of-type{border-top:none;margin-top:0}
 .pk.osae{opacity:.82}
+
+/* 終わったレースの的中表示 */
+.rb.win{background:color-mix(in srgb,var(--solid) 16%,var(--surface));
+  border-color:var(--solid);color:var(--solid-ink);opacity:1}
+.rb.win .tm{color:var(--solid-ink);opacity:.75}
+.rb.lose{opacity:.5}
+.rb .yen{display:block;font-family:var(--mono);font-size:.58rem;font-weight:600;
+  color:var(--solid-ink);letter-spacing:-.03em;margin-top:.05rem}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem .9rem;padding:.5rem 1rem 0;
+  font-size:.72rem;color:var(--faint)}
+.lgi{display:inline-flex;align-items:center;gap:.3rem}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.sw.win{background:color-mix(in srgb,var(--solid) 40%,transparent);
+  border:1px solid var(--solid)}
+.sw.lose{background:var(--surface);border:1px solid var(--rule);opacity:.5}
+.lgn{margin-left:auto}
+
+/* 1号艇が飛ぶ警告 */
+.rb.upset{border-color:var(--rough);border-width:2px}
+.rb.upset::after{content:'!';position:absolute;top:-5px;right:-4px;
+  width:15px;height:15px;border-radius:50%;background:var(--rough);color:#fff;
+  font-family:var(--cond);font-size:.6rem;font-weight:700;
+  display:grid;place-items:center;line-height:1}
+.rb{position:relative}
+.alert{margin:.9rem 1rem 0;background:color-mix(in srgb,var(--rough) 12%,var(--surface));
+  border:1px solid var(--rough);border-radius:12px;padding:.85rem 1rem;
+  display:flex;flex-direction:column;gap:.25rem}
+.al{font-family:var(--cond);font-size:.72rem;letter-spacing:.1em;font-weight:700;
+  color:var(--rough-ink)}
+.at{font-size:1rem;font-weight:600}
+.at b{font-family:var(--mono)}
+.as{font-size:.76rem;color:var(--soft);line-height:1.55}

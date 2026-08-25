@@ -239,6 +239,8 @@ function chips() {
 
 function races() {
   const e = $('#races'); e.innerHTML = '';
+  // 的中/不的中の件数を数え、凡例として出す
+  let win = 0, lose = 0;
   for (const r of S.data[S.jcd].races) {
     const b = document.createElement('button');
     b.className = 'rb' + (r.locked ? ' lk' : '');
@@ -250,7 +252,24 @@ function races() {
       tm.className = 'tm'; tm.textContent = r.deadline;
       t.appendChild(tm);
     }
-    if (r.result && r.result.combo) b.classList.add('done');
+    // 終わったレースは的中/不的中で色を分ける。
+    // 一つずつ開いて確認する手間をなくすため。
+    if (r.result && r.result.combo) {
+      b.classList.add('done');
+      const picks = (S.strategy === 'value' ? r.value : r.safe) || [];
+      const hit = picks.some(p =>
+        (p.thirds || []).some(c => `${p.first}-${p.second}-${c}` === r.result.combo));
+      b.classList.add(hit ? 'win' : 'lose');
+      hit ? win++ : lose++;
+      if (hit && r.result.payout) {
+        const y = document.createElement('span');
+        y.className = 'yen';
+        y.textContent = r.result.payout.toLocaleString();
+        t.appendChild(y);
+      }
+    }
+    // 1号艇が飛ぶ警告。実測で通常58%が15〜25%まで落ちる。
+    if (!r.locked && r.upset && r.upset.warn) b.classList.add('upset');
     const i = document.createElement('i');
     if (!r.locked && !r.pending) {
       if (r.upsetP >= 0.7) i.className = 'hi';
@@ -261,6 +280,14 @@ function races() {
     b.onclick = () => { S.rno = r.no; render(); };
     e.appendChild(b);
   }
+
+  const lg = $('#legend');
+  if (win + lose === 0) { lg.hidden = true; return; }
+  lg.hidden = false;
+  lg.innerHTML =
+    `<span class="lgi"><i class="sw win"></i>的中 ${win}R</span>
+     <span class="lgi"><i class="sw lose"></i>不的中 ${lose}R</span>
+     <span class="lgi lgn">${S.strategy === 'value' ? '大きく狙う' : '当てにいく'}の買い目で判定</span>`;
 }
 
 const cur = () => S.data[S.jcd].races.find(r => r.no === S.rno);
@@ -296,7 +323,15 @@ function verdict() {
                n: accN, p: acc, roi: ROI[accN] });
   }
 
+  const up = r.upset && r.upset.warn ? r.upset : null;
+
   v.innerHTML =
+    (up ? `<div class="alert">
+        <span class="al">本命が崩れる可能性</span>
+        <span class="at">1号艇より <b>${up.topBoat}号艇</b> を上に見ています</span>
+        <span class="as">この判定が出たレースでは、1号艇の1着率が
+          <b>約20%</b>まで落ちます（通常は約58%）。</span>
+      </div>` : '') +
     `<div class="picks">
        <div class="tabs" role="tablist">
          <button class="tab" role="tab" aria-selected="${S.strategy === 'safe'}"

@@ -108,6 +108,36 @@ def load_odds(db_path, race_ids):
     return out
 
 
+def detect_upset_warning(g):
+    """1号艇が飛ぶ可能性が高いレースを判定する。
+
+    モデルが1号艇以外を最有力と見たレースは、
+    実際に1号艇が勝つ確率が15〜25%まで落ちる(通常58〜61%)。
+    4期間の検証で再現を確認済み。
+
+    回収率も通常83.0%に対し警告レースは95.4%と高い。
+    人気が集中する1号艇を嫌えるぶん、配当妙味が出る。
+    """
+    p = g["p1"].to_numpy()
+    if p.sum() <= 0:
+        return None
+    norm = p / p.sum()
+    boats = g["boat_number"].astype(int).to_numpy()
+    top_i = int(norm.argmax())
+    top_boat = int(boats[top_i])
+
+    # 1号艇の相対評価
+    idx1 = [i for i, b in enumerate(boats) if b == 1]
+    p1 = float(norm[idx1[0]]) if idx1 else 0.0
+
+    return {
+        "warn": top_boat != 1,
+        "topBoat": top_boat,
+        "topP": round(float(norm[top_i]), 4),
+        "boat1P": round(p1, 4),
+    }
+
+
 def build_strategies(combos, odds=None, n=10):
     """2つの買い方を用意する。
 
@@ -247,6 +277,7 @@ def main():
             "wave": None if pd.isna(m.wave_height) else float(m.wave_height),
             # 買い目(印つき)
             "picks": [{**x, "mark": mark_of(i, x.get("ev"))} for i, x in enumerate(picks)],
+            "upset": detect_upset_warning(g),
             "safe": strategies["safe"],
             "value": strategies["value"],
             # 提示した点数ぶんの合計確率 = このレースへの自信
