@@ -351,9 +351,9 @@ function verdict() {
 
        ${picks.map((p, i) => `
          ${i === 0 || p.tier !== picks[i - 1].tier
-           ? `<div class="tierhead">${p.tier === 1 ? '◎ 本命 — まず押さえる'
-               : p.tier === 2 ? '○ 対抗 — 余裕があれば'
-               : '△ 押さえ — 的中率を上げたいとき'}</div>` : ''}
+           ? `<div class="tierhead">${p.tier === 1 ? '本命'
+               : p.tier === 2 ? '対抗'
+               : '押さえ'}</div>` : ''}
          <div class="pk ${p.tier === 1 ? 'honmei' : p.tier === 2 ? 'taiko' : 'osae'}">
            <span class="mk">${p.mark}</span>
            <span class="cb">${fmtCombo(p.text)}
