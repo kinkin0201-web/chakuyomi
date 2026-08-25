@@ -20,6 +20,10 @@ concurrency:
   group: predict
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  id-token: write        # Workload Identity の認証に必要
+
 jobs:
   predict:
     runs-on: ubuntu-latest
@@ -61,10 +65,16 @@ jobs:
             --out "firebase/public/data/${TODAY}.json"
           echo "{\"latest\":\"${TODAY}\"}" > firebase/public/data/index.json
 
-      - name: Hosting へ配信
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      # 組織ポリシーでサービスアカウント鍵の作成が禁止されているため、
+      # 鍵を使わない Workload Identity 連携で認証する。
+      - name: Google Cloud 認証
+        uses: google-github-actions/auth@v2
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          projectId: chakuyomi
-          channelId: live
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: github-deploy@chakuyomi.iam.gserviceaccount.com
+
+      - name: Hosting へ配信
+        run: |
+          npm install -g firebase-tools
+          cd firebase
+          firebase deploy --only hosting --project chakuyomi --non-interactive
