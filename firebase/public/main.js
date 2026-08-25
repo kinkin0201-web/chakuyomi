@@ -286,12 +286,14 @@ function verdict() {
     return { t, n: g.length, p: g.reduce((a, x) => a + (x.p || 0), 0) };
   }).filter(x => x.n);
   // ◎だけ / ◎○ / 全部 を買った場合の的中期待
+  // 実測の回収率(直近42日)。買い方を選ぶ判断材料として示す。
+  const ROI = { 2: 83.5, 5: 81.3, 10: 79.6 };
   const cum = [];
   let acc = 0, accN = 0;
   for (const x of tiers) {
     acc += x.p; accN += x.n;
-    cum.push({ label: x.t === 1 ? '◎' : x.t === 2 ? '◎○' : '全部',
-               n: accN, p: acc });
+    cum.push({ label: x.t === 1 ? '◎ だけ' : x.t === 2 ? '◎ + ○' : 'すべて',
+               n: accN, p: acc, roi: ROI[accN] });
   }
 
   v.innerHTML =
@@ -305,9 +307,10 @@ function verdict() {
 
        <div class="budget">
          ${cum.map(c => `<div class="bg">
-           <span class="bl">${c.label}</span>
-           <span class="bn">${c.n}点 / ${(c.n * 100).toLocaleString()}円</span>
-           <span class="bp">的中期待 ${(c.p * 100).toFixed(0)}%</span>
+           <span class="bg-label">${c.label}</span>
+           <span class="bg-cost">${c.n}点<i>${(c.n * 100).toLocaleString()}円</i></span>
+           <span class="bg-hit">的中 ${(c.p * 100).toFixed(0)}%</span>
+           ${c.roi ? `<span class="bg-roi">回収 ${c.roi}%</span>` : ''}
          </div>`).join('')}
        </div>
 
@@ -320,13 +323,18 @@ function verdict() {
            <span class="mk">${p.mark}</span>
            <span class="cb">${fmtCombo(p.text)}
              <span class="cx">確率 ${(p.p * 100).toFixed(1)}%</span></span>
-           <span class="pp">${p.payout ? p.payout.toLocaleString() + '円' : ''}
+           <span class="pp">${p.payout
+             ? `<b class="odds">${(p.payout / 100).toFixed(1)}倍</b>
+                <span class="ret">${r.result && r.result.combo
+                  ? `100円→${p.payout.toLocaleString()}円`
+                  : `現在 / 変動します`}</span>` : ''}
              <span class="pt ${(p.ev || 0) >= 1 ? 'good' : ''}">期待値 ${(p.ev || 0).toFixed(2)}</span></span>
          </div>`).join('')}
 
-       <div class="pf">${S.strategy === 'safe'
-         ? '当たりやすい順です。◎だけ買うと回収率が最も高くなります。'
-         : 'オッズに対して割の良い順です。当たりにくいぶん配当が大きくなります。'}</div>
+       <div class="pf">1点100円で計算しています。点数を増やすと当たりやすくなりますが、
+         回収率は下がります。${S.strategy === 'safe'
+           ? '' : '配当重視のため当たりにくいぶん、当たれば大きくなります。'}
+         <br><span class="tiny">回収率は直近42日・5,779レースの実測値です。</span></div>
      </div>` + resultBlock(r, picks);
 
   for (const b of v.querySelectorAll('.tab')) {

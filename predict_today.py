@@ -353,6 +353,14 @@ def main():
             continue
         combos = rank_combos(g)
         odds = odds_map.get(rid)
+
+        # 結果が確定したレースは、締切前に取ったオッズではなく
+        # 実際の配当を使う。オッズは締切直前まで下がり続けるため、
+        # 早い時刻に取った値をそのまま出すと結果と食い違う。
+        res = det.get("result")
+        if res and res.get("combo") and res.get("payout"):
+            odds = dict(odds or {})
+            odds[res["combo"]] = res["payout"] / 100
         picks = group_combos(combos, a.points, odds)
         strategies = build_strategies(combos, odds, a.points)
         out.append({

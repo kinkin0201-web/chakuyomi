@@ -230,6 +230,11 @@ def main():
         m = meta.loc[rid]
         combos = rank_combos(g)
         odds = odds_map.get(rid)
+
+        # 確定レースは実配当を優先する(締切前オッズとのズレを防ぐ)
+        if pd.notna(m.exact_trifecta_combo) and pd.notna(m.exact_trifecta_payout):
+            odds = dict(odds or {})
+            odds[m.exact_trifecta_combo] = float(m.exact_trifecta_payout) / 100
         picks = group_combos(combos, a.points, odds)
         strategies = build_strategies(combos, odds, a.points)
 
