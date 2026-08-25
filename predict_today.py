@@ -164,6 +164,8 @@ def main():
     p.add_argument("--model", default="trifecta")
     p.add_argument("--points", type=int, default=5)
     p.add_argument("--odds-db", default="odds.db")
+    p.add_argument("--form", default="player_form.json",
+                   help="集計済みの選手成績")
     p.add_argument("--window", type=int, default=0,
                    help="締切まで何分先のレースを更新するか(0=全件)")
     p.add_argument("--out", required=True)
@@ -198,24 +200,46 @@ def main():
     deadlines = parse_deadlines(text, hd, targets)
     print(f"  番組表: {len(b_races)} レース")
 
-    # --- 2. 選手の直近成績を用意する(過去DBから) ---
-    import sqlite3
-    conn = sqlite3.connect(a.db)
-    hist = pd.read_sql("""
-      SELECT e.player_id, e.rank, r.date FROM races r JOIN entries e USING(race_id)
-      WHERE e.rank IS NOT NULL ORDER BY r.date
-    """, conn)
-    conn.close()
-    hist["win"] = (hist["rank"] == 1).astype(float)
-    hist["top2"] = (hist["rank"] <= 2).astype(float)
-    g = hist.groupby("player_id")
-    recent = pd.DataFrame({
-        "recent_win_10": g["win"].mean(),
-        "recent_top2_10": g["top2"].mean(),
-        "recent_rank_10": g["rank"].mean(),
-        "recent_win_5": g["win"].mean(),
-        "recent_top2_5": g["top2"].mean(),
-    })
+    # --- 2. 選手の直近成績を用意する ---
+    # 過去DB(145MB)はGit管理できないため、集計済みの軽量ファイルを使う。
+    # 無ければDBから直接読む(ローカル実行時)。
+    recent = None
+    try:
+        with open(a.form, encoding="utf-8") as f:
+            form = json.load(f)
+        recent = pd.DataFrame.from_dict(
+            {k: {"recent_win_10": v[0], "recent_top2_10": v[1],
+                 "recent_rank_10": v[2], "recent_win_5": v[0],
+                 "recent_top2_5": v[1]} for k, v in form.items()},
+            orient="index")
+        print(f"  選手成績: {len(recent):,}人 ({a.form})")
+    except FileNotFoundError:
+        pass
+
+    if recent is None:
+        import sqlite3
+        try:
+            conn = sqlite3.connect(a.db)
+            hist = pd.read_sql("""
+              SELECT e.player_id, e.rank FROM races r JOIN entries e USING(race_id)
+              WHERE e.rank IS NOT NULL
+            """, conn)
+            conn.close()
+            hist["win"] = (hist["rank"] == 1).astype(float)
+            hist["top2"] = (hist["rank"] <= 2).astype(float)
+            g = hist.groupby("player_id")
+            recent = pd.DataFrame({
+                "recent_win_10": g["win"].mean(),
+                "recent_top2_10": g["top2"].mean(),
+                "recent_rank_10": g["rank"].mean(),
+                "recent_win_5": g["win"].mean(),
+                "recent_top2_5": g["top2"].mean(),
+            })
+        except Exception as e:
+            print(f"  [WARN] 選手成績を読めません: {e}", file=sys.stderr)
+            recent = pd.DataFrame(columns=[
+                "recent_win_10", "recent_top2_10", "recent_rank_10",
+                "recent_win_5", "recent_top2_5"])
 
     # --- 3. レースごとに直前情報を取得して特徴量を作る ---
     rows, details = [], []
@@ -296,6 +320,12 @@ def main():
     # --- 4. レース内の相対特徴量を作って予測する ---
     from train_model import add_features, CAT_FEATURES
     df = pd.DataFrame(rows)
+    # 欠損だけの列は object 型になり LightGBM が受け付けないため、
+    # 数値列を明示的に float へ変換する。
+    for c in df.columns:
+        if c not in ("race_id", "stadium_code", "weather",
+                     "wind_direction", "player_class"):
+            df[c] = pd.to_numeric(df[c], errors="coerce")
     df = add_features(df)
     for c in CAT_FEATURES:
         if c in df.columns:

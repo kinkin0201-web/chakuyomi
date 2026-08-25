@@ -33,13 +33,6 @@ jobs:
       - name: 依存関係
         run: pip install requests lhafile lightgbm scikit-learn pandas beautifulsoup4 lxml
 
-      - name: 過去データを復元
-        uses: actions/cache@v4
-        with:
-          path: up.db
-          key: kyotei-db-${{ github.run_id }}
-          restore-keys: kyotei-db-
-
       # 前回の出力を引き継ぐ。確定済みの結果を取り直さずに済む。
       - name: 前回の予測を復元
         uses: actions/cache@v4
@@ -47,6 +40,13 @@ jobs:
           path: firebase/public/data
           key: predict-out-${{ github.run_id }}
           restore-keys: predict-out-
+
+      - name: オッズの蓄積を復元
+        uses: actions/cache@v4
+        with:
+          path: odds.db
+          key: odds-db-${{ github.run_id }}
+          restore-keys: odds-db-
 
       - name: オッズを取得
         run: python collect_odds.py --stadiums ${{ vars.STADIUMS || '22' }} || true
