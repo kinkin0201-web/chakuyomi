@@ -162,7 +162,7 @@ def main():
     p.add_argument("--date", help="YYYY-MM-DD (既定: 本日JST)")
     p.add_argument("--db", default="up.db", help="直近成績の参照元")
     p.add_argument("--model", default="trifecta")
-    p.add_argument("--points", type=int, default=5)
+    p.add_argument("--points", type=int, default=10)
     p.add_argument("--odds-db", default="odds.db")
     p.add_argument("--form", default="player_form.json",
                    help="集計済みの選手成績")

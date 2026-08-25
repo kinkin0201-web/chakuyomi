@@ -76,6 +76,7 @@ def init_db(conn):
         stadium_name TEXT,
         race_number  INTEGER NOT NULL,
         title        TEXT,               -- 予選/準優勝戦 など
+        kimarite     TEXT,               -- 決まり手(逃げ/差し/まくり等)
         note         TEXT,               -- 進入固定 など特記事項
         distance     INTEGER,            -- m
         weather      TEXT,
@@ -124,13 +125,15 @@ def upsert_race(conn, r):
     conn.execute("""
         INSERT INTO races (race_id, date, stadium_code, stadium_name, race_number,
                            title, note, distance, weather, wind_direction, wind_speed,
-                           wave_height, exact_trifecta_payout, exact_trifecta_combo)
+                           wave_height, kimarite,
+                           exact_trifecta_payout, exact_trifecta_combo)
         VALUES (:race_id, :date, :stadium_code, :stadium_name, :race_number,
                 :title, :note, :distance, :weather, :wind_direction, :wind_speed,
-                :wave_height, :exact_trifecta_payout, :exact_trifecta_combo)
+                :wave_height, :kimarite, :exact_trifecta_payout, :exact_trifecta_combo)
         ON CONFLICT(race_id) DO UPDATE SET
             stadium_name = excluded.stadium_name,
             title        = excluded.title,
+            kimarite     = COALESCE(excluded.kimarite, races.kimarite),
             note         = COALESCE(excluded.note, races.note),
             distance     = excluded.distance,
             weather      = excluded.weather,
@@ -354,6 +357,9 @@ RE_K_COND = re.compile(
 #   S0/S1/S2 = 失格(妨害/選手責任/責任外)
 #   K0/K1  = 欠場
 # またSTタイミングは 'F0.03' のようにF/L接頭辞が付く場合がある。
+# 着順ヘッダの末尾に決まり手が入る: '... ﾚｰｽﾀｲﾑ 逃げ'
+RE_K_KIMARITE = re.compile(r"ﾚｰｽﾀｲﾑ\s*(\S+)")
+
 RE_K_RESULT = re.compile(
     r"^\s{2}(\d{2}|[SK]\d|[FL])\s+([1-6])\s+(\d{4})\s+(.+?)\s+(\d+)\s+(\d+)\s+"
     r"([\d.]+|\s*)\s*(\d?)\s*([FL]?[\d.]*)"
@@ -398,9 +404,20 @@ def parse_k_file(text, date_str, targets):
                 "wave_height": to_num(m.group(8)),
                 "exact_trifecta_combo": combo,
                 "exact_trifecta_payout": yen,
+                "kimarite": None,
                 "entries": [],
             }
             continue
+
+        # 決まり手(気象行の次の見出し行にある)
+        if rno is not None:
+            race_id = f"{date_str}_{jcd}_{rno}"
+            if race_id in out and out[race_id].get("kimarite") is None:
+                mk = RE_K_KIMARITE.search(line)
+                if mk:
+                    k = mk.group(1).replace("\u3000", "").strip()
+                    if k and not k.startswith("-"):
+                        out[race_id]["kimarite"] = k
 
         # --- 払戻表(気象行より前に出るので先に貯める) ---
         m = RE_K_PAYOUT.match(line)
@@ -498,6 +515,7 @@ def process_day(conn, d, targets):
                 "wind_direction": (k or {}).get("wind_direction"),
                 "wind_speed": (k or {}).get("wind_speed"),
                 "wave_height": (k or {}).get("wave_height"),
+                "kimarite": (k or {}).get("kimarite"),
                 "exact_trifecta_payout": (k or {}).get("exact_trifecta_payout"),
                 "exact_trifecta_combo": (k or {}).get("exact_trifecta_combo"),
             }

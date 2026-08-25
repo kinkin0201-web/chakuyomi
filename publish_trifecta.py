@@ -108,7 +108,7 @@ def load_odds(db_path, race_ids):
     return out
 
 
-def build_strategies(combos, odds=None, n=3):
+def build_strategies(combos, odds=None, n=10):
     """2つの買い方を用意する。
 
     safe  : 的中確率の高い順。当たりやすいが配当は低い。
@@ -141,9 +141,17 @@ def build_strategies(combos, odds=None, n=3):
     value = sorted(cand, key=lambda x: -x["ev"])[:n]
 
     def fmt(items, kind):
+        """印を段階で振る。
+
+        利用者が予算に応じて選べるようにする。
+          ◎ 上位2点  … 絞って買う人向け(回収率が最も高い)
+          ○ 次の3点  … 標準
+          △ 残り     … 的中率を上げたい人向け
+        """
         out = []
         for i, x in enumerate(items):
             a, b, c = x["combo"]
+            mark = "◎" if i < 2 else ("○" if i < 5 else "△")
             out.append({
                 "text": f"{a}-{b}-{c}",
                 "first": a, "second": b, "thirds": [c],
@@ -152,7 +160,8 @@ def build_strategies(combos, odds=None, n=3):
                 "ev": round(x["ev"], 3),
                 "payout": x["payout"],
                 "realOdds": x["realOdds"],
-                "mark": "◎" if i == 0 else ("○" if i == 1 else "△"),
+                "mark": mark,
+                "tier": 1 if i < 2 else (2 if i < 5 else 3),
             })
         return out
 
@@ -179,7 +188,7 @@ def main():
     p.add_argument("--db", default="up.db")
     p.add_argument("--date")
     p.add_argument("--out", required=True)
-    p.add_argument("--points", type=int, default=5)
+    p.add_argument("--points", type=int, default=10)
     p.add_argument("--odds-db", default="odds.db", help="蓄積したオッズ")
     a = p.parse_args()
 

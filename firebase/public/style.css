@@ -206,3 +206,17 @@ button:focus-visible{outline:2px solid var(--solid);outline-offset:2px}
 .tab span{display:block;font-family:var(--sans);font-size:.66rem;font-weight:400;
   margin-top:.12rem;opacity:.85}
 .tab[aria-selected=true]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+
+/* 予算別の的中期待 */
+.budget{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;margin:.1rem 0 .7rem}
+.bg{background:var(--ground);border:1px solid var(--rule);border-radius:9px;
+  padding:.5rem .4rem;text-align:center;display:flex;flex-direction:column;gap:.1rem}
+.bl{font-family:var(--cond);font-size:1rem;font-weight:700}
+.bn{font-family:var(--mono);font-size:.68rem;color:var(--faint)}
+.bp{font-size:.7rem;color:var(--solid-ink);font-weight:600}
+/* 段階の見出し */
+.tierhead{font-family:var(--cond);font-size:.72rem;letter-spacing:.08em;
+  color:var(--faint);font-weight:700;padding:.55rem 0 .15rem;
+  border-top:1px solid var(--rule);margin-top:.3rem}
+.tierhead:first-of-type{border-top:none;margin-top:0}
+.pk.osae{opacity:.82}

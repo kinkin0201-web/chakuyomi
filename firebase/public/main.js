@@ -187,7 +187,7 @@ function renderSummary() {
         <div class="si"><span class="sk">見送り</span>
           <span class="sv">${skip}R</span></div>
       </div>
-      <p class="sn">${S.strategy === 'value' ? '妙味' : '堅い'}の買い目で計算。結果確定後に回収率を表示します。</p>`;
+      <p class="sn">${S.strategy === 'value' ? '大きく狙う' : '当てにいく'}の買い目で計算。結果確定後に回収率を表示します。</p>`;
     return;
   }
 
@@ -278,34 +278,55 @@ function verdict() {
   const picks = S.strategy === 'value' ? value : safe;
   if (!picks.length) { v.innerHTML = ''; return; }
 
-  const pts = picks.reduce((a, p) => a + (p.points || 1), 0);
+  const pts = picks.length;
   const hitP = picks.reduce((a, p) => a + (p.p || 0), 0);
-  const evAvg = picks.reduce((a, p) => a + (p.ev || 0), 0) / picks.length;
+  // 段階ごとの小計。予算に応じて選べるようにする。
+  const tiers = [1, 2, 3].map(t => {
+    const g = picks.filter(p => (p.tier || 3) === t);
+    return { t, n: g.length, p: g.reduce((a, x) => a + (x.p || 0), 0) };
+  }).filter(x => x.n);
+  // ◎だけ / ◎○ / 全部 を買った場合の的中期待
+  const cum = [];
+  let acc = 0, accN = 0;
+  for (const x of tiers) {
+    acc += x.p; accN += x.n;
+    cum.push({ label: x.t === 1 ? '◎' : x.t === 2 ? '◎○' : '全部',
+               n: accN, p: acc });
+  }
 
   v.innerHTML =
     `<div class="picks">
        <div class="tabs" role="tablist">
          <button class="tab" role="tab" aria-selected="${S.strategy === 'safe'}"
-           data-s="safe">堅い<span>当たりやすさ重視</span></button>
+           data-s="safe">当てにいく<span>的中率 重視</span></button>
          <button class="tab" role="tab" aria-selected="${S.strategy === 'value'}"
-           data-s="value">妙味<span>回収率重視</span></button>
+           data-s="value">大きく狙う<span>配当 重視</span></button>
        </div>
-       <div class="ph">
-         <span class="lab">${pts}点 / ${(pts * 100).toLocaleString()}円</span>
-         <span class="conf">的中期待 ${(hitP * 100).toFixed(0)}%
-           <span class="cs">平均期待値 ${evAvg.toFixed(2)}</span></span>
+
+       <div class="budget">
+         ${cum.map(c => `<div class="bg">
+           <span class="bl">${c.label}</span>
+           <span class="bn">${c.n}点 / ${(c.n * 100).toLocaleString()}円</span>
+           <span class="bp">的中期待 ${(c.p * 100).toFixed(0)}%</span>
+         </div>`).join('')}
        </div>
-       ${picks.map(p => `
-         <div class="pk ${(p.ev || 0) >= 1.3 ? 'honmei' : (p.ev || 0) >= 1 ? 'taiko' : 'osae'}">
+
+       ${picks.map((p, i) => `
+         ${i === 0 || p.tier !== picks[i - 1].tier
+           ? `<div class="tierhead">${p.tier === 1 ? '◎ 本命 — まず押さえる'
+               : p.tier === 2 ? '○ 対抗 — 余裕があれば'
+               : '△ 押さえ — 的中率を上げたいとき'}</div>` : ''}
+         <div class="pk ${p.tier === 1 ? 'honmei' : p.tier === 2 ? 'taiko' : 'osae'}">
            <span class="mk">${p.mark}</span>
            <span class="cb">${fmtCombo(p.text)}
              <span class="cx">確率 ${(p.p * 100).toFixed(1)}%</span></span>
            <span class="pp">${p.payout ? p.payout.toLocaleString() + '円' : ''}
              <span class="pt ${(p.ev || 0) >= 1 ? 'good' : ''}">期待値 ${(p.ev || 0).toFixed(2)}</span></span>
          </div>`).join('')}
+
        <div class="pf">${S.strategy === 'safe'
-         ? '確率の高い順。当たりやすいぶん配当は控えめです。'
-         : '期待値の高い順。当たりにくいぶん配当が大きくなります。'}</div>
+         ? '当たりやすい順です。◎だけ買うと回収率が最も高くなります。'
+         : 'オッズに対して割の良い順です。当たりにくいぶん配当が大きくなります。'}</div>
      </div>` + resultBlock(r, picks);
 
   for (const b of v.querySelectorAll('.tab')) {
