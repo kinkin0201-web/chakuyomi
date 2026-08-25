@@ -326,6 +326,9 @@ function verdict() {
   const up = r.upset && r.upset.warn ? r.upset : null;
 
   v.innerHTML =
+    // 結果はレース選択の直後に置く。買い目を見る前に
+    // 「当たったのか」が分かる方が確認が速い。
+    resultBlock(r, picks) +
     (up ? `<div class="alert">
         <span class="al">本命が崩れる可能性</span>
         <span class="at">1号艇より <b>${up.topBoat}号艇</b> を上に見ています</span>
@@ -370,7 +373,7 @@ function verdict() {
          回収率は下がります。${S.strategy === 'safe'
            ? '' : '配当重視のため当たりにくいぶん、当たれば大きくなります。'}
          <br><span class="tiny">回収率は直近42日・5,779レースの実測値です。</span></div>
-     </div>` + resultBlock(r, picks);
+     </div>`;
 
   for (const b of v.querySelectorAll('.tab')) {
     b.onclick = () => {
@@ -391,9 +394,13 @@ function resultBlock(r, picks) {
   if (!r.result || !r.result.combo) return '';
   const hit = (picks || []).some(p =>
     (p.thirds || []).some(c => `${p.first}-${p.second}-${c}` === r.result.combo));
+  // 何レース目の結果かを明示する。番号が無いと取り違える。
   return `<div class="rz ${hit ? 'hit' : ''}">
-      <span>結果 <b>${esc(r.result.combo)}</b>
-      ${r.result.payout ? `／ ${r.result.payout.toLocaleString()}円` : ''}</span>
+      <span class="rzl">${r.no}R 確定
+        <b>${fmtCombo(r.result.combo)}</b>
+        ${r.result.payout
+          ? `<span class="rzp">${r.result.payout.toLocaleString()}円</span>` : ''}
+      </span>
       <span class="rj">${hit ? '的中' : '不的中'}</span>
     </div>`;
 }

@@ -20,9 +20,8 @@
   --mark-soft:#F97C3C;
   --mark-dim:rgba(232,89,12,.14);
 
-  /* 意味の色。アクセントとは別に持つ */
-  --hit:#3E9C6B;
-  --hit-dim:rgba(62,156,107,.15);
+  /* 的中を示す色。薄い塗りは使わず、線と文字で示す */
+  --hit:#4DBF84;
 
   /* 艇色は競技の規定。変更しない */
   --l1:#F2F0ED;--l2:#0B0F14;--l3:#D8352A;--l4:#1B6FC4;--l5:#E8B21E;--l6:#3E9C6B;
@@ -44,8 +43,7 @@
     --mark:#C7490B;
     --mark-soft:#A83C05;
     --mark-dim:rgba(199,73,11,.10);
-    --hit:#2D7A52;
-    --hit-dim:rgba(45,122,82,.12);
+    --hit:#1F6B45;
     --l1:#FFFFFF;--l2:#12171D;
   }
 }
@@ -54,7 +52,7 @@
   --ink:#12171D;--soft:#4A545F;--faint:#7C8792;
   --rule:#E4E1DC;--rule-hi:#CFCBC4;
   --mark:#C7490B;--mark-soft:#A83C05;--mark-dim:rgba(199,73,11,.10);
-  --hit:#2D7A52;--hit-dim:rgba(45,122,82,.12);
+  --hit:#1F6B45;
   --l1:#FFFFFF;--l2:#12171D;
 }
 
@@ -112,9 +110,13 @@ h1{font-family:var(--disp);font-size:1.7rem;font-weight:400;margin:0;
 .rb i.hi{background:var(--mark)} .rb i.lo{background:var(--hit)}
 .rb.pd{opacity:.55}
 .rb.lk{opacity:.4}
-.rb.win{background:var(--hit-dim);color:var(--hit)}
-.rb.win .tm{color:var(--hit);opacity:.85}
-.rb.lose{opacity:.42}
+/* 的中は下線で示す。塗りつぶすと選択中か分からなくなる */
+.rb.win{color:var(--hit);box-shadow:inset 0 -3px 0 var(--hit)}
+.rb.win .tm{color:var(--hit)}
+.rb[aria-pressed="true"].win{color:#fff;box-shadow:inset 0 -3px 0 #fff}
+.rb[aria-pressed="true"].win .tm,
+.rb[aria-pressed="true"].win .yen{color:rgba(255,255,255,.9)}
+.rb.lose{opacity:.38}
 .rb .yen{font-family:var(--num);font-size:.56rem;font-weight:500;
   color:var(--hit);letter-spacing:-.04em}
 .rb.upset::after{content:"";position:absolute;top:3px;right:3px;
@@ -124,7 +126,7 @@ h1{font-family:var(--disp);font-size:1.7rem;font-weight:400;margin:0;
 .legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem;padding:.5rem 1rem 0;
   font-size:.68rem;color:var(--faint)}
 .lgi{display:inline-flex;align-items:center;gap:.35rem}
-.sw{width:9px;height:9px;display:inline-block}
+.sw{width:12px;height:3px;display:inline-block}
 .sw.win{background:var(--hit)}
 .sw.lose{background:var(--rule-hi)}
 .lgn{margin-left:auto}
@@ -192,13 +194,20 @@ h1{font-family:var(--disp);font-size:1.7rem;font-weight:400;margin:0;
 .tiny{opacity:.8}
 
 /* ── 結果 ── */
-.rz{margin:.7rem 1rem 0;display:flex;justify-content:space-between;
-  align-items:center;padding:.55rem .8rem;background:var(--sunk);
-  border-left:2px solid var(--rule-hi);font-size:.84rem}
-.rz b{font-family:var(--num)}
-.rj{font-family:var(--disp);font-size:.85rem;letter-spacing:.08em;color:var(--faint)}
-.rz.hit{background:var(--hit-dim);border-left-color:var(--hit)}
+/* 結果。レース選択と買い方タブの間に置く */
+.rz{display:flex;justify-content:space-between;align-items:center;
+  padding:.6rem 1rem;border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);font-size:.86rem;margin-top:.5rem}
+.rzl{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;
+  font-family:var(--disp);font-size:.95rem;letter-spacing:.06em;color:var(--faint)}
+.rzl b{font-family:var(--num);font-size:.92rem;font-weight:500;color:var(--ink);
+  letter-spacing:0}
+.rzp{font-family:var(--num);font-size:.8rem;color:var(--soft)}
+.rj{font-family:var(--disp);font-size:1rem;letter-spacing:.08em;color:var(--faint)}
+.rz.hit{border-left:3px solid var(--hit)}
 .rz.hit .rj{color:var(--hit)}
+.rz.hit .rzl b{color:var(--hit)}
+.rz.hit .rzp{color:var(--hit)}
 
 /* ── 収支 ── */
 #summary{margin:.85rem 1rem 0}
