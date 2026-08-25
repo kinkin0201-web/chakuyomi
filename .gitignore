@@ -1,0 +1,30 @@
+# --- 除外するもの ---
+
+# データベース(数十MB〜。履歴に残すと肥大化する)
+# GitHub Actions ではキャッシュから復元する
+*.db
+*.db-journal
+
+# 生成される配信データ(毎回作り直す)
+firebase/public/data/
+
+# 依存パッケージ
+node_modules/
+__pycache__/
+
+# 作業用
+*.lzh
+*.log
+nohup.out
+.DS_Store
+
+# 秘密情報(念のため。Secret Manager で管理しているので通常は存在しない)
+*serviceAccount*.json
+.env
+.env.*
+
+# --- 含めるもの(明示) ---
+# モデルファイルは Actions が予測に使うため必要
+!trifecta_*.txt
+!upset_model.txt
+!model.json

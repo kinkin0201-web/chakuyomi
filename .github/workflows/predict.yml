@@ -1,0 +1,68 @@
+# 当日の予測を更新する。
+#
+# 展示タイムは締切の約10分前に公開されるため、1日数回では取りこぼす。
+# レース開催時間帯だけ15分ごとに動かし、それ以外は止めておく。
+# (GitHub Actions は公開リポジトリなら無料。動かさなければ費用も発生しない)
+
+name: predict-today
+
+on:
+  schedule:
+    # JST 11:00〜19:00 を15分間隔 (UTC 02:00〜10:00)
+    - cron: '*/15 2-10 * * *'
+  workflow_dispatch:
+
+# 前の実行が終わる前に次が来たら、古い方を打ち切る。
+# 15分以内に終わる想定だが、遅延時に重ならないようにする。
+concurrency:
+  group: predict
+  cancel-in-progress: true
+
+jobs:
+  predict:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存関係
+        run: pip install requests lhafile lightgbm scikit-learn pandas beautifulsoup4 lxml
+
+      - name: 過去データを復元
+        uses: actions/cache@v4
+        with:
+          path: up.db
+          key: kyotei-db-${{ github.run_id }}
+          restore-keys: kyotei-db-
+
+      # 前回の出力を引き継ぐ。確定済みの結果を取り直さずに済む。
+      - name: 前回の予測を復元
+        uses: actions/cache@v4
+        with:
+          path: firebase/public/data
+          key: predict-out-${{ github.run_id }}
+          restore-keys: predict-out-
+
+      - name: オッズを取得
+        run: python collect_odds.py --stadiums ${{ vars.STADIUMS || '22' }} || true
+
+      - name: 予測を更新
+        run: |
+          mkdir -p firebase/public/data
+          TODAY=$(TZ=Asia/Tokyo date +%Y-%m-%d)
+          python predict_today.py \
+            --stadiums "${{ vars.STADIUMS || '22' }}" \
+            --window 45 \
+            --out "firebase/public/data/${TODAY}.json"
+          echo "{\"latest\":\"${TODAY}\"}" > firebase/public/data/index.json
+
+      - name: Hosting へ配信
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: chakuyomi
+          channelId: live

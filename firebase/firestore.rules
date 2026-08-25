@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// 基本方針: 既定で全拒否し、必要な操作だけを明示的に許可する。
+// クライアントSDKからの書き込みは原則させず、Functions経由に限定する。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- 共通関数 ----
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    // 管理者は Custom Claims で判定する。
+    // Firestoreの値で判定すると、その文書を書き換えられた時に昇格される。
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.admin == true;
+    }
+
+    // ---- 会員 ----
+    match /users/{uid} {
+      // 本人と管理者のみ読める(他人の会員情報は見えない)
+      allow read: if isOwner(uid) || isAdmin();
+
+      // 書き込みはFunctions(Admin SDK)のみ。
+      // Admin SDKはルールを迂回するため、ここは常に拒否でよい。
+      // クライアントに書かせると plan を自分で書き換えられる。
+      allow write: if false;
+    }
+
+    // ---- セッション ----
+    match /sessions/{sid} {
+      // セッションは本人にも読ませない。
+      // 読めると他端末のsidが分かり、なりすましの糸口になる。
+      allow read, write: if false;
+    }
+
+    // ---- 購読・課金 ----
+    match /subscriptions/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow write: if false;              // Stripe Webhook のみが更新する
+    }
+
+    // ---- 監査ログ ----
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();           // 管理者のみ閲覧
+      allow write: if false;              // 追記はFunctionsのみ
+    }
+
+    // ---- 予測データは Firestore に置かない ----
+    // (読み取り課金が跳ね上がるため Functions 経由で配信する)
+
+    // ---- 上記以外は全拒否 ----
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

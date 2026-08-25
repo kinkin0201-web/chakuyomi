@@ -1,0 +1,35 @@
+.admin{max-width:840px;margin-inline:auto;padding:0 1rem 4rem}
+.gate{padding:3rem 1rem;text-align:center;color:var(--soft)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:.6rem;margin:1rem 0}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:.9rem 1rem}
+.stat .k{font-family:var(--cond);font-size:.72rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);font-weight:700}
+.stat .v{font-family:var(--mono);font-size:1.5rem;font-weight:600;margin-top:.2rem}
+.bar{display:flex;gap:.5rem;margin:1rem 0 .6rem}
+.bar input{flex:1;padding:.55rem .8rem;border-radius:9px;border:1.5px solid var(--rule);
+  background:var(--surface);color:var(--ink);font-size:.95rem;font-family:var(--mono)}
+.tbl{width:100%;border-collapse:collapse;background:var(--surface);
+  border:1px solid var(--rule);border-radius:12px;overflow:hidden;font-size:.87rem}
+.tbl th,.tbl td{padding:.6rem .8rem;text-align:left;border-bottom:1px solid var(--rule)}
+.tbl thead th{font-family:var(--cond);font-size:.72rem;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--faint)}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl td.m{font-family:var(--mono);font-size:.8rem}
+.pill{display:inline-block;font-family:var(--cond);font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;padding:.15em .5em;border-radius:3px;
+  border:1px solid currentColor}
+.pill.paid{color:var(--solid-ink)} .pill.free{color:var(--faint)}
+.pill.sus{color:var(--rough-ink)} .pill.grant{color:var(--solid-ink)}
+.more{text-align:center;margin-top:.8rem}
+.sheet{padding:1.3rem;display:flex;flex-direction:column;gap:.7rem}
+.sheet h2{font-family:var(--cond);font-size:1.2rem;margin:0}
+.sheet label{font-size:.83rem;color:var(--soft);display:flex;flex-direction:column;gap:.3rem}
+.sheet input,.sheet select{padding:.5rem .7rem;border-radius:8px;
+  border:1.5px solid var(--rule);background:var(--ground);color:var(--ink);font-size:.95rem}
+.danger{background:var(--rough);color:#fff;border:none}
+.msg{font-size:.82rem;padding:.5rem .7rem;border-radius:8px;background:var(--sunk)}
+.uc{display:flex;align-items:center;gap:.5rem}
+.av{width:30px;height:30px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--sunk)}
+.av.ph{display:block}
+.pill.invited{color:var(--solid-ink);background:color-mix(in srgb,var(--solid) 12%,transparent)}

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>会員管理｜チャクヨミ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Roboto+Condensed:wght@400;700&display=swap">
+<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="/admin.css">
+</head>
+<body>
+<div class="admin">
+  <header>
+    <div class="hd">
+      <div><p class="d">管理</p><h1>会員管理</h1></div>
+      <button class="ghost" id="signin">ログイン</button>
+      <button class="ghost" id="signout" hidden>ログアウト</button>
+    </div>
+  </header>
+
+  <div id="gate" class="gate">
+    <p>開発者アカウントでログインしてください。</p>
+  </div>
+
+  <main id="main" hidden>
+    <section class="stats" id="stats"></section>
+
+    <div class="bar">
+      <input id="q" type="search" placeholder="会員IDで検索" autocomplete="off">
+      <button class="ghost" id="reload">更新</button>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>会員</th><th>プラン</th><th>期限</th><th>状態</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div class="more"><button class="ghost" id="more" hidden>さらに読み込む</button></div>
+  </main>
+</div>
+
+<dialog id="dlg"><form method="dialog" class="sheet" id="sheet"></form></dialog>
+<script type="module" src="/admin.js"></script>
+</body>
+</html>

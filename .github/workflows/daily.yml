@@ -1,0 +1,66 @@
+# 毎日のデータ取り込みと週次の再学習
+# GitHub Actions の無料枠(公開リポジトリは無制限)で運用する
+
+name: daily-ingest
+
+on:
+  schedule:
+    # 毎日 JST 3:00 (UTC 18:00)。前日分は確定済み。
+    - cron: '0 18 * * *'
+  workflow_dispatch:      # 手動実行も可能にする
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存関係
+        run: pip install requests lhafile lightgbm scikit-learn pandas
+
+      # DBはリポジトリに含めず、キャッシュから復元する
+      # (数百MBのバイナリをGit管理すると履歴が膨らむため)
+      - name: DBを復元
+        uses: actions/cache@v4
+        with:
+          path: kyotei_prediction_core.db
+          key: kyotei-db-${{ github.run_id }}
+          restore-keys: kyotei-db-
+
+      - name: 前日分を取り込み
+        run: |
+          YESTERDAY=$(date -u -d '1 day ago' +%Y-%m-%d)
+          python build_db_bulk.py --start $YESTERDAY --end $YESTERDAY
+
+      # 週1回(日曜)だけ再学習する。学習は数秒で終わる。
+      # 週1回(日曜)だけ再学習。学習自体は数秒で終わる。
+      - name: 再学習(日曜のみ)
+        run: |
+          if [ "$(date -u +%u)" = "7" ]; then
+            echo "再学習を実行します"
+            python train_model.py
+            python export_model.py
+          else
+            echo "日曜以外のためスキップ"
+          fi
+
+      - name: 健全性チェック
+        run: python monitor.py --json > health.json || echo "警告あり"
+
+      - name: 配信用データを生成
+        run: |
+          TODAY=$(date -u -d '9 hours' +%Y-%m-%d)
+          python export_race_data.py --date $TODAY --out public/data || true
+
+      - name: 結果を保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: |
+            health.json
+            model.json
+            public/data/
