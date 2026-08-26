@@ -66,7 +66,7 @@ jobs:
           TODAY=$(TZ=Asia/Tokyo date +%Y-%m-%d)
           python predict_today.py \
             --stadiums "${{ vars.STADIUMS || '22' }}" \
-            --window 25 \
+            --window 20 \
             --points 10 \
             --out "firebase/public/data/${TODAY}.json"
           echo "{\"latest\":\"${TODAY}\"}" > firebase/public/data/index.json

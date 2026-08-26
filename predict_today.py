@@ -178,15 +178,19 @@ def main():
     hd = d.strftime("%Y%m%d")
     print(f"対象日: {d}")
 
-    # 既存ファイルがあれば、確定済みの結果を引き継ぐ。
-    # 結果は変わらないので取り直す必要がない(時間の節約)。
-    prev = {}
+    # 既存ファイルから、確定済みの結果と取得済みの展示タイムを引き継ぐ。
+    # 展示タイムは締切直前にしか公開されず、実行タイミングによっては
+    # 空になる。一度取れた値を空で上書きしないよう保持する。
+    prev, prev_ex = {}, {}
     try:
         with open(a.out, encoding="utf-8") as f:
             old = json.load(f)
         for r in (old.get("races") if isinstance(old, dict) else old) or []:
             if r.get("result") and r["result"].get("combo"):
                 prev[r["raceId"]] = r["result"]
+            ex = {b["boat"]: b.get("ex") for b in r.get("boats", []) if b.get("ex")}
+            if ex:
+                prev_ex[r["raceId"]] = ex
     except Exception:
         pass
 
@@ -260,6 +264,9 @@ def main():
             need_before = -180 < left <= a.window
 
         ex, w = fetch_before(jcd, rno, hd) if need_before else ({}, {})
+        # 今回取れなかった艇は前回の値を引き継ぐ
+        for boat, v in (prev_ex.get(race_id) or {}).items():
+            ex.setdefault(int(boat), v)
 
         entries = sorted(rec["entries"], key=lambda x: x["boat_number"])
         if len(entries) < 6:
