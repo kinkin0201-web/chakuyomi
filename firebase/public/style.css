@@ -369,3 +369,10 @@ table.ab tr.hi td{color:var(--mark);font-weight:500}
 .sheet.about section.warn h3{color:var(--mark)}
 .fine{font-size:.7rem;color:var(--faint);line-height:1.6;
   padding:.8rem 0 0;border-top:1px solid var(--rule);margin:0}
+
+/* ── AIによるレースの読み ── */
+.read{margin:.85rem 1rem 0;padding:.75rem .9rem;background:var(--sunk);
+  border-left:2px solid var(--rule-hi)}
+.rl{font-family:var(--disp);font-size:.72rem;letter-spacing:.12em;
+  color:var(--faint);display:block;margin-bottom:.25rem}
+.read p{margin:0;font-size:.84rem;line-height:1.75;color:var(--ink)}

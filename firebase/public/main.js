@@ -385,6 +385,11 @@ function verdict() {
     // 結果はレース選択の直後に置く。買い目を見る前に
     // 「当たったのか」が分かる方が確認が速い。
     resultBlock(r, picks) +
+    // AIの読み。買い目や確率は変えず、根拠を言葉にしたもの。
+    (r.comment ? `<div class="read">
+        <span class="rl">レースの読み</span>
+        <p>${esc(r.comment)}</p>
+      </div>` : '') +
     (up ? `<div class="alert">
         <span class="al">本命が崩れる可能性</span>
         <span class="at">1号艇より <b>${up.topBoat}号艇</b> を上に見ています</span>
