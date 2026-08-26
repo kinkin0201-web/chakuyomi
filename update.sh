@@ -23,6 +23,11 @@ python3 predict_today.py \
   --window 20 \
   --out "firebase/public/data/${TODAY}.json" 2>/dev/null | tail -1
 
+# AIの読みを付ける。APIキーが無ければ黙って飛ばす。
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+  python3 explain.py --file "firebase/public/data/${TODAY}.json" 2>/dev/null | tail -1
+fi
+
 echo "{\"latest\":\"${TODAY}\"}" > firebase/public/data/index.json
 
 # 配信
