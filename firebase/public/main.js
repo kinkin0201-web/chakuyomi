@@ -143,7 +143,62 @@ function renderEmpty(msg) {
 
 // ---------- 描画 ----------
 function render() {
-  renderSummary(); renderBanner(); chips(); races(); verdict(); cond(); list();
+  renderWatch(); renderSummary(); renderBanner(); chips(); races(); verdict(); cond(); list();
+}
+
+/**
+ * 本命が崩れる可能性が高いレースを、全場から拾って先頭に出す。
+ *
+ * 全レースの買い目より、こちらの方が実測の回収率が高い(95.4% vs 79.6%)。
+ * 1日1〜2レースしか出ないので、まずここを見て判断してもらう。
+ */
+function renderWatch() {
+  const el = $('#watch');
+  if (!S.data) { el.hidden = true; return; }
+
+  const list = [];
+  for (const [jcd, st] of Object.entries(S.data)) {
+    for (const r of st.races) {
+      if (r.locked || !r.upset || !r.upset.warn) continue;
+      list.push({ jcd, name: st.name, r });
+    }
+  }
+  if (!list.length) { el.hidden = true; return; }
+
+  // 締切が近い順に並べる
+  list.sort((a, b) => (a.r.deadline || '').localeCompare(b.r.deadline || ''));
+
+  el.hidden = false;
+  el.innerHTML =
+    `<div class="watch">
+       <div class="wh">
+         <span class="wt">本命が危ないレース</span>
+         <span class="wn">${list.length}件</span>
+       </div>
+       ${list.map(({ jcd, name, r }) => {
+         const done = r.result && r.result.combo;
+         const flew = done && r.result.combo[0] !== '1';
+         return `<button class="wr${done ? ' done' : ''}" data-j="${jcd}" data-r="${r.no}">
+           <span class="wr1">${esc(name)} <b>${r.no}R</b>
+             <i>${r.deadline || ''}</i></span>
+           <span class="wr2">1号艇より <b>${r.upset.topBoat}号艇</b></span>
+           <span class="wr3">${done
+             ? (flew ? '飛んだ' : '逃げた')
+             : '締切前'}</span>
+         </button>`;
+       }).join('')}
+       <p class="wf">この判定が出たレースでは、1号艇の1着率が約20%まで落ちます
+         （通常は約58%）。1号艇を買う前にご確認ください。</p>
+     </div>`;
+
+  for (const b of el.querySelectorAll('.wr')) {
+    b.onclick = () => {
+      S.jcd = b.dataset.j;
+      S.rno = Number(b.dataset.r);
+      render();
+      document.getElementById('verdict').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+  }
 }
 
 /** 選択中の競艇場の収支を出す。回収率は商品の核なので隠さず見せる。 */

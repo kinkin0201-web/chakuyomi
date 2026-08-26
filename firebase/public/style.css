@@ -309,3 +309,28 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--mark);
   .chip,.rb,.tab,.ghost,.cta{transition:background .1s ease,color .1s ease,
     border-color .1s ease}
 }
+
+/* ── 本命が危ないレース(全場から拾って先頭に出す) ── */
+.watch{margin:.85rem 1rem 0;border:1px solid var(--mark);
+  display:flex;flex-direction:column}
+.wh{display:flex;align-items:baseline;justify-content:space-between;
+  padding:.6rem .85rem;background:var(--mark-dim);
+  border-bottom:1px solid var(--mark)}
+.wt{font-family:var(--jp);font-weight:600;font-size:.92rem;color:var(--mark)}
+.wn{font-family:var(--num);font-size:.72rem;color:var(--mark)}
+.wr{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;
+  padding:.55rem .85rem;border:0;border-top:1px solid var(--rule);
+  background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;
+  font-family:var(--jp);font-size:.86rem;width:100%}
+.wr:first-of-type{border-top:0}
+.wr:hover{background:var(--sunk)}
+.wr1{display:flex;align-items:baseline;gap:.35rem}
+.wr1 b{font-family:var(--disp);font-size:1.05rem;letter-spacing:.04em}
+.wr1 i{font-family:var(--num);font-size:.68rem;color:var(--faint);font-style:normal}
+.wr2{font-size:.76rem;color:var(--soft);white-space:nowrap}
+.wr2 b{font-family:var(--num);color:var(--mark)}
+.wr3{font-family:var(--disp);font-size:.8rem;letter-spacing:.06em;
+  color:var(--faint);white-space:nowrap}
+.wr.done .wr3{color:var(--ink)}
+.wf{margin:0;padding:.6rem .85rem;font-size:.7rem;color:var(--faint);
+  line-height:1.6;border-top:1px solid var(--rule)}
