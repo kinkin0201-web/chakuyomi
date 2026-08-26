@@ -346,9 +346,8 @@ function verdict() {
        <div class="budget">
          ${cum.map(c => `<div class="bg">
            <span class="bg-label">${c.label}</span>
-           <span class="bg-cost">${c.n}点<i>${(c.n * 100).toLocaleString()}円</i></span>
-           <span class="bg-hit">的中 ${(c.p * 100).toFixed(0)}%</span>
-           ${c.roi ? `<span class="bg-roi">回収 ${c.roi}%</span>` : ''}
+           <span class="bg-cost">${(c.n * 100).toLocaleString()}円</span>
+           <span class="bg-hit">${(c.p * 100).toFixed(0)}%</span>
          </div>`).join('')}
        </div>
 
@@ -369,10 +368,8 @@ function verdict() {
              <span class="pt ${(p.ev || 0) >= 1 ? 'good' : ''}">期待値 ${(p.ev || 0).toFixed(2)}</span></span>
          </div>`).join('')}
 
-       <div class="pf">1点100円で計算しています。点数を増やすと当たりやすくなりますが、
-         回収率は下がります。${S.strategy === 'safe'
-           ? '' : '配当重視のため当たりにくいぶん、当たれば大きくなります。'}
-         <br><span class="tiny">回収率は直近42日・5,779レースの実測値です。</span></div>
+       <div class="pf">1点100円。数字は的中期待。点数を増やすほど当たりやすく、
+         回収率は下がります（実測 2点83% / 5点81% / 10点80%）。</div>
      </div>`;
 
   for (const b of v.querySelectorAll('.tab')) {
