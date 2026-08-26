@@ -69,6 +69,7 @@ $('#signin').onclick = async () => {
 };
 
 $('#acct').onclick = async () => { renderMyPage(); $('#mypage').showModal(); };
+$('#help').onclick = () => $('#about').showModal();
 
 // ---------- データ取得 ----------
 /** JSON を取得する。取れなければ null。キャッシュは使わない。 */

@@ -334,3 +334,38 @@ button:focus-visible,summary:focus-visible{outline:2px solid var(--mark);
 .wr.done .wr3{color:var(--ink)}
 .wf{margin:0;padding:.6rem .85rem;font-size:.7rem;color:var(--faint);
   line-height:1.6;border-top:1px solid var(--rule)}
+
+/* ── ヘルプ ── */
+.icon{width:28px;height:28px;flex:0 0 auto;border-radius:50%;
+  border:1px solid var(--rule-hi);background:transparent;color:var(--soft);
+  font-family:var(--disp);font-size:1rem;cursor:pointer;line-height:1;
+  display:grid;place-items:center;padding:0}
+.icon:hover{border-color:var(--mark);color:var(--mark)}
+#about{max-width:480px}
+.sheet.about{max-height:80vh;overflow-y:auto;display:flex;flex-direction:column;gap:0}
+.sheet.about section{padding:.9rem 0;border-top:1px solid var(--rule)}
+.sheet.about section:first-of-type{border-top:0;padding-top:.3rem}
+.sheet.about h3{font-family:var(--jp);font-size:.92rem;font-weight:700;
+  margin:0 0 .35rem;color:var(--ink)}
+.sheet.about p{margin:0 0 .4rem;font-size:.82rem;line-height:1.7;color:var(--soft)}
+.sheet.about p:last-child{margin-bottom:0}
+.sheet.about b{color:var(--ink);font-weight:700}
+.sheet.about dl{margin:.3rem 0 .5rem;display:grid;grid-template-columns:auto 1fr;
+  gap:.25rem .7rem;font-size:.82rem}
+.sheet.about dt{font-weight:700;color:var(--ink);white-space:nowrap}
+.sheet.about dd{margin:0;color:var(--soft);line-height:1.6}
+table.ab{width:100%;border-collapse:collapse;font-size:.8rem;margin:.4rem 0}
+table.ab th,table.ab td{padding:.35rem .5rem;text-align:right;
+  border-bottom:1px solid var(--rule)}
+table.ab th:first-child,table.ab td:first-child{text-align:left}
+table.ab thead th{font-family:var(--disp);font-size:.72rem;letter-spacing:.08em;
+  color:var(--faint);font-weight:400}
+table.ab td{font-family:var(--num);font-variant-numeric:tabular-nums}
+table.ab td:first-child{font-family:var(--jp)}
+table.ab tr.hi td{color:var(--mark);font-weight:500}
+.note-s{font-size:.72rem!important;color:var(--faint)!important}
+.sheet.about section.warn{border-left:3px solid var(--mark);padding-left:.75rem;
+  background:var(--mark-dim)}
+.sheet.about section.warn h3{color:var(--mark)}
+.fine{font-size:.7rem;color:var(--faint);line-height:1.6;
+  padding:.8rem 0 0;border-top:1px solid var(--rule);margin:0}

@@ -18,6 +18,8 @@
         <p class="d" id="dt"></p>
         <h1>CHAKUYOMI</h1>
       </div>
+      <button class="icon" id="help" aria-label="このツールについて"
+        title="このツールについて">?</button>
       <button class="ghost" id="acct" hidden>マイページ</button>
       <button class="ghost" id="signin">ログイン</button>
     </div>
@@ -42,6 +44,69 @@
 
   <p class="note" id="note"></p>
 </div>
+
+<dialog id="about">
+  <form method="dialog" class="sheet about">
+    <h2>チャクヨミについて</h2>
+
+    <section>
+      <h3>何をするツールか</h3>
+      <p>出走表・展示タイム・オッズをもとに、3連単の買い目を絞り込みます。
+        120通りから10点まで機械的に絞るので、買い目を組み立てる手間が省けます。</p>
+    </section>
+
+    <section>
+      <h3>2つの買い方</h3>
+      <dl>
+        <dt>当てにいく</dt>
+        <dd>的中確率の高い順。当たりやすいぶん配当は控えめです。</dd>
+        <dt>大きく狙う</dt>
+        <dd>オッズに対して割の良い順。当たりにくいぶん配当が大きくなります。</dd>
+      </dl>
+      <p>◎○△は優先度です。予算に応じて、◎だけ買う・全部買うを選べます。</p>
+    </section>
+
+    <section>
+      <h3>本命が危ないレース</h3>
+      <p>1号艇以外を最有力と判断したレースを、画面の先頭に出します。
+        この判定が出たとき、1号艇の1着率は<b>約20%</b>まで落ちます
+        （通常は約58%）。1号艇を買う前の確認にお使いください。</p>
+    </section>
+
+    <section>
+      <h3>実測の成績</h3>
+      <table class="ab">
+        <thead><tr><th>買い方</th><th>的中率</th><th>回収率</th></tr></thead>
+        <tbody>
+          <tr><td>◎ 2点</td><td>16.9%</td><td>83.5%</td></tr>
+          <tr><td>◎○ 5点</td><td>32.9%</td><td>81.3%</td></tr>
+          <tr><td>全10点</td><td>49.1%</td><td>79.6%</td></tr>
+          <tr class="hi"><td>警告レース</td><td>41.7%</td><td>95.4%</td></tr>
+        </tbody>
+      </table>
+      <p class="note-s">学習に使っていない直近42日・5,779レースで検証した値です。</p>
+    </section>
+
+    <section class="warn">
+      <h3>買い続けると損をします</h3>
+      <p>回収率はいずれも100%に届きません。競艇の払戻率は約75%で、
+        この壁を越えられていないためです。<b>利益を約束するものではありません。</b></p>
+      <p>買い目を絞る手間を省き、判断材料を得るためのツールとお考えください。</p>
+    </section>
+
+    <section>
+      <h3>データの更新</h3>
+      <p>展示タイムは締切の約10分前に公開されます。
+        判断は<b>締切の5〜10分前</b>にご確認ください。
+        オッズは締切まで変動するため、表示は目安です。</p>
+    </section>
+
+    <p class="fine">20歳未満の方は舟券を購入できません。
+      舟券の購入はご自身の判断と責任でお願いします。</p>
+
+    <div class="acts"><button class="ghost" value="close">閉じる</button></div>
+  </form>
+</dialog>
 
 <dialog id="mypage">
   <form method="dialog" class="sheet">
